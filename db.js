@@ -1,84 +1,53 @@
-const { Connection, Request } = require("tedious");
-require('dotenv').config()
-// Create connection to database
-const config = {
-  authentication: {
-    options: {
-      userName: process.env.DB_USER, // update me
-      password: process.env.DB_PASS // update me
-    },
-    type: "default"
-  },
-  server: process.env.DB_HOST, // update me
-  options: {
-    database: "atp", //update me
-    encrypt: true
-  }
-  
-};
+const mysqlx = require('@mysql/xdevapi');
 
-/* 
-    //Use Azure VM Managed Identity to connect to the SQL database
-    const config = {
-        server: process.env["db_server"],
-        authentication: {
-            type: 'azure-active-directory-msi-vm',
-        },
-        options: {
-            database: process.env["db_database"],
-            encrypt: true,
-            port: 1433
-        }
-    };
+const config = { schema: 'atp', table: 'aeronaves', user: process.env.DB_USER }
 
-    //Use Azure App Service Managed Identity to connect to the SQL database
-    const config = {
-        server: process.env["db_server"],
-        authentication: {
-            type: 'azure-active-directory-msi-app-service',
-        },
-        options: {
-            database: process.env["db_database"],
-            encrypt: true,
-            port: 1433
-        }
+mysqlx.getSession({ user: config.user })
+    .then(session => {
+        return session.sql(`create database if not exists ${config.schema}`)
+            .execute()
+            .then(() => {
+                return session.sql(`create table if not exists ${config.schema}.${config.table} (idaeronave TINYINT UNSIGNED NOT NULL, nome VARCHAR(45), tipo VARCHAR(5), fabricante VARCHAR(45))`)
+                    .execute()
+            })
+            .then(() => {
+                const table = session.getSchema(config.schema).getTable(config.table);
+
+                return table.insert('nome', 'tipo', 'fabricante')
+                    .values('Embraer 190', 'E190', 'Embraer')
+                    .execute()
+                    .then(() => {
+                        return table.select('nome', 'tipo','fabricante')
+                            .execute()
+                    })
+                    .then(res => {
+                        console.log(res.fetchOne()); 
+                    })
+                    
+                    .then(() => {
+                        return table.select('nome', 'fabricante')
+                            .where('nome = :v')
+                            .bind('v', 'Airbus A320')
+                            .execute()
+                    })
+                    .then(res => {
+                        console.log(res.fetchOne()); 
+                    })
+                    
+                    .then(() => {
+                        return table.select()
+                            .execute()
+                    })
+                    .then(res => {
+                        console.log(res.fetchAll()); // []
+                    });
+            })
+            .then(() => {
+                return session.sql(`SELECT * FROM ${config.schema}.${config.table}`)
+                    .execute();
+            })
+            
+            .then(() => {
+                return session.close();
+            });
     });
-
-*/
-
-const connection = new Connection(config);
-
-// Attempt to connect and execute queries if connection goes through
-connection.on("connect", err => {
-  if (err) {
-    console.error(err.message);
-  } else {
-    queryDatabase();
-  }
-});
-
-connection.connect();
-
-function queryDatabase() {
-  console.log("Reading rows from the Table...");
-
-  // Read all rows from table
-  const request = new Request(
-    `SELECT * from aeronaves`,
-    (err, rowCount) => {
-      if (err) {
-        console.error(err.message);
-      } else {
-        console.log(`${rowCount} row(s) returned`);
-      }
-    }
-  );
-
-  request.on("row", columns => {
-    columns.forEach(column => {
-      console.log("%s\t%s", column.metadata.colName, column.value);
-    });
-  });
-
-  connection.execSql(request);
-}
