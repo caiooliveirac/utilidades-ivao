@@ -1,6 +1,6 @@
 const mysqlx = require('@mysql/xdevapi');
 
-const config = { schema: 'atp', table: 'aeronaves', user: process.env.DB_USER }
+const config = { schema: 'atp', table: 'aeronaves', user: process.env.DB_USER , port:"3306"}
 
 mysqlx.getSession({ user: config.user })
     .then(session => {
