@@ -1,9 +1,10 @@
 import mysql.connector
+from processenv import nome, senha, host
 
-conn = mysql.connector.connect(user='caio',
-                                   password='mevina11',
+conn = mysql.connector.connect(user=nome,
+                                   password=senha,
                                    database='atp',
-                                   host='20.197.176.175',
+                                   host=host,
                                    )
                                    
 

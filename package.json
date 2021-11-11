@@ -8,9 +8,24 @@
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "dotenv": "^10.0.0",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
-  }
+    "pug": "2.0.0-beta11",
+    "tedious": "^14.0.0"
+  },
+  "description": "Aprendendo programação imaginando aplicações que possivelmente serviriam a IVAO de algum modo.",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caiooliveirac/utilidades-ivao.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caiooliveirac/utilidades-ivao/issues"
+  },
+  "homepage": "https://github.com/caiooliveirac/utilidades-ivao#readme"
 }
